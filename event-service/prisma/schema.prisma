@@ -12,25 +12,25 @@ datasource db {
 }
 
 
-model events {
+model Event {
   id            Int      @id @default(autoincrement())
   name          String
-  performers    String[]
+  performers    Json
   description   String
   startTime     DateTime
   endTime       DateTime
   location      String
   date          DateTime
   capacity      Int
-  seats         seats[]
+  seats         Seat[]
 
 }
 
 
-model seats {
+model Seat {
   id            Int      @id @default(autoincrement())
   event_id      Int
-  events        events   @relation(fields: [event_id], references: [id])
+  event         Event  @relation(fields: [event_id], references: [id])
   seat_number   String
   price         Decimal
   is_available  Boolean

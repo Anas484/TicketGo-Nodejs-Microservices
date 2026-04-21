@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const { parse } = require('dotenv');
 // const {random} = require('Math')
 
 
@@ -13,17 +14,19 @@ const prisma = new PrismaClient({ adapter });
 
 const generateSeats = async (req, res) => {
     try {
-        const { eventId, numberOfSeats, seatsPerRow = 10 } = req.body;
-        if (!eventId || !numberOfSeats) {
-            return res.status(400).json({ message: 'Event ID and number of seats are required' });
-        }
-        const event = await prisma.events.findUnique({
+        const eventId = req.params.id
+        const { seatsPerRow = 10 } = req.body;
+        const event = await prisma.event.findUnique({
             where: {
-                id: eventId
+                id: parseInt(eventId)
             }
         });
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
+        }
+        const numberOfSeats = event.capacity
+        if (!eventId || !numberOfSeats) {
+            return res.status(400).json({ message: 'Event ID and number of seats are required' });
         }
         const data = [];
 
@@ -41,13 +44,13 @@ const generateSeats = async (req, res) => {
             const rowLetter = String.fromCharCode(65 + rowIndex);
 
             data.push({
-                event_id: eventId,
+                event_id: parseInt(eventId),
                 seat_number: `${rowLetter}${seatIndex}`,
-                price: new prisma.Decimal(getPriceByRow(rowIndex)),
+                price: getPriceByRow(rowIndex),
                 is_available: true
             });
         }
-        const result = await prisma.seats.createMany({
+        const result = await prisma.seat.createMany({
             data
         });
         res.status(201).json({ result });
@@ -56,6 +59,7 @@ const generateSeats = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 
 
 

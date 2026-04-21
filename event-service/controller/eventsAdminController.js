@@ -12,7 +12,7 @@ const prisma = new PrismaClient({ adapter });
 
 const getAllEvents = async(req, res) => {
     try {
-        const events = await prisma.events.findMany();
+        const events = await prisma.event.findMany();
         if (!events) {
             return res.status(401).json({ message: 'No events found' });
         }
@@ -27,7 +27,7 @@ const getAllEvents = async(req, res) => {
 const getEventById = async(req, res) => {
     try {
         const id = req.params.id;
-        const event = await prisma.events.findUnique({
+        const event = await prisma.event.findUnique({
             where: {
                 id: parseInt(id)
             }
@@ -46,15 +46,16 @@ const getEventById = async(req, res) => {
 const createEvent = async(req, res) => {
     try {
         const { name, performers, description, startTime, endTime, location ,date, capacity} = req.body;
-        const event = await prisma.events.create({
+        startTime.ISO
+        const event = await prisma.event.create({
             data: {
                 name : name,
                 performers : performers,
                 description : description,
-                startTime : startTime,
-                endTime : endTime,
+                startTime : new Date(startTime).toISOString(),
+                endTime : new Date(endTime).toISOString(),
                 location : location,
-                date : date,
+                date : new Date(date).toISOString(),
                 capacity : capacity
             }
         });
@@ -65,10 +66,10 @@ const createEvent = async(req, res) => {
     }
 }
 
-const deleteEvent = (req , res) => {
+const deleteEvent = async (req , res) => {
     try {
         const id = req.params.id
-        prisma.events.delete(id)
+        await prisma.event.delete(id)
         res.status(200).json({message : `Deleted event with id : ${id}`})
     } catch (error) {
         console.error(error)
@@ -77,10 +78,10 @@ const deleteEvent = (req , res) => {
 }
 
 
-const updateEvent = (req , res) => {
+const updateEvent = async (req , res) => {
     try {
         const id = req.params.id 
-        prisma.events.update({
+        await prisma.event.update({
             where:{
                 id: parseInt(req.params.id)
             },
