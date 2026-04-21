@@ -65,10 +65,40 @@ const createEvent = async(req, res) => {
     }
 }
 
+const deleteEvent = (req , res) => {
+    try {
+        const id = req.params.id
+        prisma.events.delete(id)
+        res.status(200).json({message : `Deleted event with id : ${id}`})
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message : 'Internal server error'})
+    }
+}
+
+
+const updateEvent = (req , res) => {
+    try {
+        const id = req.params.id 
+        prisma.events.update({
+            where:{
+                id: parseInt(req.params.id)
+            },
+            data : req.body
+        })
+        res.status(200).json({message : `Updated event with id : ${id}`})
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message : 'Internal server error'})
+    }
+}
+
 
 
 module.exports = {
     getAllEvents,
     getEventById,
-    createEvent
+    createEvent,
+    deleteEvent,
+    updateEvent
 }
