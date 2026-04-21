@@ -7,10 +7,14 @@ const adminRouter = require('./router/adminRouter')
 const authRouter = require('./router/authRouter')
 const userRouter = require('./router/userRouter')
 const logMiddleware = require('./middleware/logMiddleware')
+const {connectRabbitMQ}  =require('./config/rabbitMQConfig')
+
+
 
 console.log('Process env USER_SERVICE_PORT:', process.env.USER_SERVICE_PORT)
 const app =  express();
 const PORT = process.env.USER_SERVICE_PORT
+connectRabbitMQ()
 // app.use(cors())
 app.use(express.json())
 app.use(logMiddleware)
