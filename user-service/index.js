@@ -1,14 +1,14 @@
-require('dotenv').config({ path: './.env' })
+const dotenv = require('dotenv')
 const express = require('express')
 const cors = require('cors')
-const { postgresConnect } = require('./config/postgresConfig')
-const { addLog } = require('./config/logConfig')
 const userRouter = require('./router/userRouter')
 
+dotenv.config()
 
+console.log('Process env USER_SERVICE_PORT:', process.env.USER_SERVICE_PORT)
 const app =  express();
-const PORT = process.env.USER_SERVICE_PORT || 3001 
-app.use(cors())
+const PORT = process.env.USER_SERVICE_PORT
+// app.use(cors())
 app.use(express.json())
 app.use('/api/users',userRouter)
 
