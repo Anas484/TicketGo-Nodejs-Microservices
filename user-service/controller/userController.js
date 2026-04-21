@@ -15,31 +15,20 @@ const getAllUsers = async (req, res) => {
         if (users.length === 0) {
             return res.status(404).json({ message: 'No users found' });
         }
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const createUser = async (req,res) => {
-    try {
-        const { name, email, password , role} = req.body;
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'Name, email and password are required' });
-        }
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password,
-                role
-            }
+        res.status(200).json({
+            users: users.map(user => ({
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role
+            }))
         });
-        res.status(201).json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
+
 
 const getUserById = async (req,res) => {
     try {
@@ -51,11 +40,18 @@ const getUserById = async (req,res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json(user);
+        res.status(200).json({
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
+
 
 const updateUser = async (req, res) => {
     try {
@@ -65,7 +61,13 @@ const updateUser = async (req, res) => {
             },
             data: req.body
         });
-        res.status(200).json(user);
+        res.status(200).json({
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -90,7 +92,6 @@ const deleteUser = async (req, res) => {
 module.exports = {
     getAllUsers,
     getUserById,
-    createUser,
     updateUser,
     deleteUser
 };
