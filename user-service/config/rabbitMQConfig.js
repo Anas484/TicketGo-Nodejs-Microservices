@@ -4,12 +4,9 @@ let channel;
 
 async function connectRabbitMQ() {
   const connection = await amqp.connect('amqp://localhost:5672');
-
   channel = await connection.createChannel();
 
-  await channel.assertQueue('seat_booked');
-
-  console.log('RabbitMQ connected');
+  console.log('RabbitMQ connected (User Service)');
 }
 
 function getChannel() {
@@ -19,4 +16,7 @@ function getChannel() {
   return channel;
 }
 
-module.exports = { connectRabbitMQ, getChannel };
+module.exports = {
+  connectRabbitMQ,
+  getChannel,
+};

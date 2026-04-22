@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const {sendSeatBooked} = require('../utils/rabbitmqQueues')
+const {publishSeatBooked} = require('../utils/seatBookQueue')
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL
@@ -37,7 +37,11 @@ const getCurrentUserDetails = async (req, res) => {
 const bookTicket = async (req , res) => {
     try {
         console.log(req.body)
-        await sendSeatBooked(req.body)
+        await publishSeatBooked({
+            user_id: req.user.id,
+            event_id: req.body.event_id,
+            seats: req.body.seats
+        })
         res.status(200).json({"message":"sent the booking data"})
     } catch (error) {
         console.error(error)

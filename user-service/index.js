@@ -19,7 +19,7 @@ connectRabbitMQ()
 app.use(express.json())
 app.use(logMiddleware)
 app.use('/api/users/auth',authRouter)
-app.use('/api/admin/users',jwtFilter, allowRoles('Admin'),adminRouter)
+app.use('/api/users/admin',jwtFilter, allowRoles('Admin'),adminRouter)
 app.use('/api/users',jwtFilter,allowRoles('Admin','User'),userRouter)
 
 app.listen(PORT , () => {
