@@ -25,7 +25,6 @@ const getAllBookings = (req, res) => {
 }
 
 
-
 const getBookingById = (req, res) => {
     try {
         const id = req.params.id
