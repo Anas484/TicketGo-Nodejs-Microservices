@@ -13,14 +13,12 @@ const roleFilter = require('./middleware/roleFilterMiddleware')
 const app = express();
 const PORT = process.env.EVENT_SERVICE_PORT || 3002;
 app.use(express.json());
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(jwtFilter)
 app.use(logMiddleware)
-app.use('/api/admin/events',roleFilter('Admin'),eventsAdminRouter);
-app.use('/api/admin/seats', roleFilter('Admin'), seatsAdminRouter)
+app.use('/api/events/admin',roleFilter('Admin'),eventsAdminRouter);
+app.use('/api/seats/admin', roleFilter('Admin'), seatsAdminRouter)
 app.use('/api/seats', seatRouter)
-
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 
