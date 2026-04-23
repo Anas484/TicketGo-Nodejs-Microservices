@@ -34,30 +34,56 @@ async function lockSeats(user_id,event_id, seats) {
       EX: 300,
     });     
     if (!result) {
-      throw new Error(`Seat ${seat} is already booked/locked`);
+      console.log(`Seat ${seat} is already booked/locked`);
     }
   }
   console.log('Seats locked');
 }
 
-const startBookSeatConsumer = async(req , res) => {
-    console.log("started Consuming")
-    const channel = getChannel()
-    await channel.purgeQueue('seat_booked')
-    channel.consume('seat_booked', async (msg) => {
-    const data = JSON.parse(msg.content.toString());
-    const {user_id, event_id , seats} = data
-    lockSeats(user_id,event_id,seats)
-    await prisma.booking.create({
-        data:{
-            userId: user_id,
-            eventId: event_id,
-            seats: seats
+const startBookSeatConsumer = async (req , res) => {
+    try {
+      console.log("started Consuming")
+      const channel = getChannel()
+      await channel.purgeQueue('seat_booked')
+      channel.consume('seat_booked', async (msg) => {
+      const data = JSON.parse(msg.content.toString());
+      const {user_id, event_id , seats} = data
+      lockSeats(user_id,event_id,seats)
+      const result = await axios.get('http://localhost:3002/api/seats/internal/get-seats-status',{
+        params: {
+          event_id: event_id,
+          seats: seats
         }
-    })
-    console.log("created booking")
+      })
+      if (result) {
+        await result.forEach(async (seat) => {
+          if(seat.is_available === false) {
+            throw new Error(`Seat ${seat.seatNumber} is already booked`);
+          }       
+        })
+        await axios.patch('http://localhost:3002/api/seats/internal/update-seats-status',{
+            params:{
+              event_id: event_id,
+              seats: seats,
+            }
+          }) 
+      }
+      await prisma.booking.create({
+          data:{
+              userId: user_id,
+              eventId: event_id,
+              seats: seats
+          }
+      })
+      channel.ack(msg)
+      console.log("created booking")
+      channel.nack(msg, false, false);
     
 });
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({"message":"Server error"})
+    }
 
 
 }
