@@ -46,7 +46,6 @@ const getEventById = async(req, res) => {
 const createEvent = async(req, res) => {
     try {
         const { name, performers, description, startTime, endTime, location ,date, capacity} = req.body;
-        startTime.ISO
         const event = await prisma.event.create({
             data: {
                 name : name,
@@ -69,7 +68,11 @@ const createEvent = async(req, res) => {
 const deleteEvent = async (req , res) => {
     try {
         const id = req.params.id
-        await prisma.event.delete(id)
+        await prisma.event.delete({
+            where: {
+                id: parseInt(id)
+            }
+        })
         res.status(200).json({message : `Deleted event with id : ${id}`})
     } catch (error) {
         console.error(error)
@@ -93,7 +96,6 @@ const updateEvent = async (req , res) => {
         res.status(500).json({message : 'Internal server error'})
     }
 }
-
 
 
 module.exports = {
