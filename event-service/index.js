@@ -14,6 +14,7 @@ const app = express();
 const PORT = process.env.EVENT_SERVICE_PORT || 3002;
 app.use(express.json());
 app.use('/api/seats/internal', seatsInternalRouter)
+
 app.use(jwtFilter)
 app.use(logMiddleware)
 app.use('/api/events/admin',roleFilter('Admin'),eventsAdminRouter);

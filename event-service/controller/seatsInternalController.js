@@ -13,19 +13,19 @@ const prisma = new PrismaClient({ adapter });
 
 
 
-const getAllSeatsStatus = (req, res) => {
+const getAllSeatsStatus = async (req, res) => {
     try {
-        const seats = req.body
-        const result = prisma.seat.findMany({
+        const {eventId, seats} = req.body
+        const result = await prisma.seat.findMany({
             where : {
-                eventId: seats.eventId,
-                seatNumber: {
-                    in: seats.seats
+                event_id: eventId,
+                seat_number: {
+                    in: seats
+                }
                 },
                 select:{
-                    seatNumber: true,
-                    status: true
-                }
+                    seat_number: true,
+                    is_available: true
             }
         })
         if (!result) {
@@ -39,18 +39,18 @@ const getAllSeatsStatus = (req, res) => {
 }
 
 
-const updateSeatsStatus = (req, res) => {
+const updateSeatsStatus = async (req, res) => {
     try {
          const { seats, event_id } = req.body;
-        const result = prisma.seat.updateMany({
+        const result = await prisma.seat.updateMany({
             where:{
                 event_id: event_id,
-                seatNumber: {
+                seat_number: {
                     in: seats
                 }
             },
             data:{
-                status: false
+                is_available: false
             }
         })
         res.status(200).json(result)
