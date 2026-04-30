@@ -1,15 +1,17 @@
-import type{Request, Response} from "express"
+import{response, type Request, type Response} from "express"
 import { PrismaClient } from "@prisma/client"
 import type{ EventRequest } from "../interfaces/EventInterface.js"
+import { userResponseMapper, usersResponseMapper } from "../utils/Mapper.js"
 
 const prisma = new PrismaClient();
 
 
-// get All userss
+
 const getAllUsers = async(req: Request, res: Response) => {
     try {
         const users = await prisma.user.findMany();
-        res.status(200).json({"data": users})
+        const userResponse = usersResponseMapper(users);
+        res.status(200).json({"data": userResponse})
     }catch (error){
         console.log(error)
         res.status(500).json({"message":`Server error ${error}`});
@@ -23,7 +25,11 @@ const getUserById = async(req: Request, res: Response) => {
                 id: Number(req.params.id)
             }
         });
-        res.status(200).json({"data": user})
+        if (user) {
+            const response = userResponseMapper(user);
+            res.status(200).json({"data": response})
+        }
+        res.status(400).json({"message": "user not found"})
     }catch (error){
         console.log(error)
         res.status(500).json({"message":`Server error ${error}`});
@@ -131,7 +137,31 @@ const deleteBooking = async(req: Request, res: Response) => {
     }
 }
 
-
+const generateSeats = async(req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const capacity = await prisma.event.findUnique({
+            where:{
+                id: Number(id)
+            },
+            select:{
+                capacity:true
+            }
+        });
+        const seats = await prisma.seat.createMany({
+            data: Array.from({ length: Number(capacity) }, (_, i) => ({
+                eventId: id,    
+                seatNumber: `${i + 1}`,
+                price: Number((Math.random() * 500 + 100).toFixed(2)),
+                isAvailable: true
+            }))
+        });
+        res.status(200).json({"data": seats})
+    }catch (error){
+        console.log(error)
+        res.status(500).json({"message":`Server error ${error}`});
+    }
+}
 
 
 
@@ -145,5 +175,6 @@ export {
     deleteEvent,
     getAllBookings,
     getBookingById,
-    deleteBooking
+    deleteBooking,
+    generateSeats
 }
