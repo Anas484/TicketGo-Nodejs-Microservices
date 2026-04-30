@@ -20,3 +20,9 @@ export interface LoginResponse {
     id : number;
     token: string;
 }
+
+
+export interface User {
+    id :string;
+    role:string
+}

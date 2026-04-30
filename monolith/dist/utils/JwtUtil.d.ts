@@ -1,5 +1,4 @@
 import "dotenv/config";
 import type { JwtPayload } from "../interfaces/JwtInterface.js";
-declare const generateToken: (payload: JwtPayload) => string;
-export default generateToken;
+export declare const generateToken: (payload: JwtPayload) => string;
 //# sourceMappingURL=JwtUtil.d.ts.map

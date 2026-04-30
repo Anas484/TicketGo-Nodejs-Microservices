@@ -1,8 +1,20 @@
 export interface Signup {
-    fistName: string;
+    firstName: string;
     lastName: string;
     email: string;
     password: string;
+    role: string;
+}
+export interface Login {
+    email: string;
+    password: string;
+}
+export interface LoginResponse {
+    id: number;
+    token: string;
+}
+export interface User {
+    id: string;
     role: string;
 }
 //# sourceMappingURL=AuthInterface.d.ts.map

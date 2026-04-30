@@ -1,5 +1,5 @@
 export interface JwtPayload {
-    id: String;
-    role: String;
+    id: string;
+    role: string;
 }
 //# sourceMappingURL=JwtInterface.d.ts.map
