@@ -1,12 +1,18 @@
-import { response } from "express";
-import { PrismaClient } from "@prisma/client";
-import { userResponseMapper, usersResponseMapper } from "../utils/Mapper.js";
-const prisma = new PrismaClient();
+import {} from "express";
+import { prisma } from "../utils/PrismaConn.js";
+import { EventRequest, EventResponse, UserZod, updateEventsRequest } from "../zod/AdminZod.js";
+import z from "zod";
+import { id } from "zod/locales";
+const UsersArrayZod = z.array(UserZod);
+const EventsArrayZod = z.array(EventResponse);
 const getAllUsers = async (req, res) => {
     try {
         const users = await prisma.user.findMany();
-        const userResponse = usersResponseMapper(users);
-        res.status(200).json({ "data": userResponse });
+        const userResponse = UsersArrayZod.safeParse(users);
+        if (!userResponse.success) {
+            console.log("error with DB");
+        }
+        return res.status(200).json({ message: "success", users: userResponse.data });
     }
     catch (error) {
         console.log(error);
@@ -20,30 +26,41 @@ const getUserById = async (req, res) => {
                 id: Number(req.params.id)
             }
         });
-        if (user) {
-            const response = userResponseMapper(user);
-            res.status(200).json({ "data": response });
+        if (!user) {
+            return res.status(400).json({ "message": "user not found" });
         }
-        res.status(400).json({ "message": "user not found" });
+        const userResponse = UserZod.safeParse(user);
+        if (!userResponse.success) {
+            return res.status(400).json({ message: "Validation error" });
+        }
+        return res.status(200).json({ message: "success", data: userResponse.data });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const getAllEvents = async (req, res) => {
     try {
         const events = await prisma.event.findMany();
-        res.status(200).json({ "data": events });
+        const eventsResponse = EventsArrayZod.safeParse(events);
+        if (!eventsResponse.success) {
+            throw new Error("Validation error");
+        }
+        return res.status(200).json({ message: "success", data: eventsResponse.data });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const createEvent = async (req, res) => {
     try {
-        const { name, description, date, location, capacity } = req.body;
+        const parseEvent = EventRequest.safeParse(req.body);
+        if (!parseEvent.success) {
+            throw new Error("Please enter correct fields");
+        }
+        const { name, description, date, location, capacity } = parseEvent.data;
         const event = await prisma.event.create({
             data: {
                 name: name,
@@ -53,27 +70,35 @@ const createEvent = async (req, res) => {
                 capacity: capacity
             }
         });
-        res.status(201).json({ "data": event });
+        return res.status(201).json({ message: "success", data: event });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const updateEvent = async (req, res) => {
     try {
-        const data = req.body;
+        const parsedEvent = updateEventsRequest.safeParse(req.body);
+        const id = Number(req.params.id);
+        if (!parsedEvent.success) {
+            throw new Error("Please enter correct fields");
+        }
+        const cleanedData = Object.fromEntries(Object.entries(parsedEvent.data).filter(([_, v]) => v !== undefined));
+        if (isNaN(id)) {
+            return res.status(400).json({ message: "Invalid event id" });
+        }
         const event = await prisma.event.update({
             where: {
-                id: Number(req.params.id)
+                id: id
             },
-            data: data
+            data: cleanedData
         });
-        res.status(200).json({ "data": event });
+        return res.status(200).json({ "data": event });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const deleteEvent = async (req, res) => {
@@ -83,21 +108,21 @@ const deleteEvent = async (req, res) => {
                 id: Number(req.params.id)
             }
         });
-        res.status(200).json({ "data": event });
+        return res.status(200).json({ "data": event });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const getAllBookings = async (req, res) => {
     try {
         const bookings = await prisma.booking.findMany();
-        res.status(200).json({ "data": bookings });
+        return res.status(200).json({ "data": bookings });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const getBookingById = async (req, res) => {
@@ -107,11 +132,11 @@ const getBookingById = async (req, res) => {
                 id: Number(req.params.id)
             }
         });
-        res.status(200).json({ "data": booking });
+        return res.status(200).json({ "data": booking });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const deleteBooking = async (req, res) => {
@@ -121,11 +146,11 @@ const deleteBooking = async (req, res) => {
                 id: Number(req.params.id)
             }
         });
-        res.status(200).json({ "data": booking });
+        return res.status(200).json({ "data": booking });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const generateSeats = async (req, res) => {
@@ -147,11 +172,11 @@ const generateSeats = async (req, res) => {
                 isAvailable: true
             }))
         });
-        res.status(200).json({ "data": seats });
+        return res.status(200).json({ "data": seats });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 export { getAllUsers, getUserById, getAllEvents, createEvent, updateEvent, deleteEvent, getAllBookings, getBookingById, deleteBooking, generateSeats };

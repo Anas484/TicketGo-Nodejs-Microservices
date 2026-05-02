@@ -1,11 +1,15 @@
 import "dotenv/config"
 import jwt from "jsonwebtoken";
-import type {JwtPayload} from "../interfaces/JwtInterface.js"
+import { JwtPayload } from "../zod/AuthZod.js"
 
 const SECRET_KEY : any = process.env.JWT_SECRET_KEY
 
-export const generateToken = (payload : JwtPayload) : string => {
-    return jwt.sign(payload, SECRET_KEY, { expiresIn: "1d" });
+export const generateToken = (payload : unknown) : string => {
+    const parsed = JwtPayload.safeParse(payload);
+    if (!parsed.success) {
+        throw new Error("Invalid payload");
+    }
+    return jwt.sign(parsed.data, SECRET_KEY, { expiresIn: "1d" });
 }
 
 
