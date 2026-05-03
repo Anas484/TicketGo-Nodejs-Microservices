@@ -5,7 +5,7 @@ export const roleAccessMiddleware = (role) => {
         if (!user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-        if (!(role === user.role)) {
+        if (!(role === user.role.toString().toLowerCase().trim())) {
             return res.status(403).json({ message: 'Forbidden' });
         }
         next();

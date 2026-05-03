@@ -26,7 +26,9 @@ const signup = async (req, res) => {
         if (role === "admin") {
             enterRole = Role.admin;
         }
-        enterRole = Role.user;
+        else {
+            enterRole = Role.user;
+        }
         await prisma.user.create({
             data: {
                 firstName: firstName,

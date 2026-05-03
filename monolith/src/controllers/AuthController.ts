@@ -28,8 +28,9 @@ const signup = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(password, 10)
         if (role === "admin") {
             enterRole = Role.admin
+        }else{
+            enterRole = Role.user
         }
-        enterRole = Role.user
         
         await prisma.user.create({
             data:{
