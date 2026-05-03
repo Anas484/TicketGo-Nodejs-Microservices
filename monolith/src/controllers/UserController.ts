@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { BookingRequest } from "../interfaces/UserInterface.js";
-import { lockSeats, areSeatsAvailable } from "../utils/BookingUtils.js"
+import { lockSeats, areSeatsAvailable, seatsPriceSum } from "../utils/BookingUtils.js"
 import { userResponseMapper } from "../utils/Mapper.js";
 import { updateSeatStatusSchema  } from "../zod/InternalZod.js";
 import { updateSeatsInternal } from "../utils/BookingUtils.js";
@@ -52,12 +52,14 @@ const createBooking = async (req: Request, res: Response) => {
         await lockSeats(userId, eventId.toString(), seatNumbers);
 
         const areSeatsAvailableResult = await areSeatsAvailable(eventId, seatNumbers);
+        const totalPrice =  await seatsPriceSum(eventId,seatNumbers);
         if (areSeatsAvailableResult) {
             const booking = await prisma.booking.create({
             data: {
                 userId: Number(userId),
                 eventId: eventId,
-                seatNumbers: seatNumbers
+                seatNumbers: seatNumbers,
+                totalPrice: totalPrice
             }
         });
         await updateSeatsInternal(eventId, seatNumbers);

@@ -3,13 +3,15 @@ import express from 'express'
 import AuthRouter from './routes/AuthRouter.js'
 import AdminRouter from './routes/AdminRouter.js'
 import UserRouter from './routes/UserRouter.js'
-import { connectRedis } from "./configs/redisConfig.js"
+// import { connectRedis } from "./configs/redisConfig.js"
 
 const app = express();
 
-(() => {
-    connectRedis();
-})()
+
+
+// (() => {
+//     connectRedis();
+// })()
 
 
 app.use(express.json())

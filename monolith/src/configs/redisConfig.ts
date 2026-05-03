@@ -1,30 +1,32 @@
 import "dotenv/config";
-import redis from "redis";
+import { Redis } from '@upstash/redis'
 
-let client : any;
 
-async function connectRedis() {
-  client = redis.createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-  });
+const redis = Redis.fromEnv()
 
-  client.on('error', (err :any) => {
-    console.error('Redis error:', err);
-  });
+// let client : any;
 
-  await client.connect();
+// async function connectRedis() {
+//   client = redis.createClient({
+//     url: process.env.REDIS_URL || 'redis://localhost:6379',
+//   });
 
-  console.log('Redis connected');
-}
+//   client.on('error', (err :any) => {
+//     console.error('Redis error:', err);
+//   });
 
-function getRedisClient() {
-  if (!client) {
-    throw new Error('Redis not initialized');
-  }
-  return client;
-}
+//   await client.connect();
+
+//   console.log('Redis connected');
+// }
+
+// function getRedisClient() {
+//   if (!client) {
+//     throw new Error('Redis not initialized');
+//   }
+//   return client;
+// }
 
 export {
-  getRedisClient,
-  connectRedis
+  redis
 }

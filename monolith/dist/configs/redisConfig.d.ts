@@ -1,5 +1,5 @@
 import "dotenv/config";
-declare function connectRedis(): Promise<void>;
-declare function getRedisClient(): any;
-export { getRedisClient, connectRedis };
+import { Redis } from '@upstash/redis';
+declare const redis: Redis;
+export { redis };
 //# sourceMappingURL=redisConfig.d.ts.map

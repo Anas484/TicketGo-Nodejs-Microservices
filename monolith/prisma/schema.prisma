@@ -63,6 +63,7 @@ model Booking {
     userId Int  
     eventId Int
     seatNumbers String[]
+    totalPrice Float
 
     user User @relation(fields: [userId], references: [id])
     event Event @relation(fields: [eventId], references: [id])

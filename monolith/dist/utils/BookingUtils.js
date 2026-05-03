@@ -1,13 +1,13 @@
-import { getRedisClient } from "../configs/redisConfig.js";
+import { redis } from "../configs/redisConfig.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 async function lockSeats(userId, eventId, seatNumbers) {
-    const redisClient = getRedisClient();
+    //   const redis = getredis();
     for (const seat of seatNumbers) {
         const key = `seat_lock:${eventId}:${seat}`;
-        const result = await redisClient.set(key, userId, {
-            NX: true,
-            EX: 300,
+        const result = await redis.set(key, userId, {
+            nx: true,
+            ex: 300,
         });
         if (!result) {
             console.log(`Seat ${seat} is already booked/locked`);
@@ -15,6 +15,26 @@ async function lockSeats(userId, eventId, seatNumbers) {
     }
     console.log('Seats locked');
 }
+const seatsPriceSum = async (eventId, seatNumbers) => {
+    try {
+        const prices = await prisma.seat.findMany({
+            where: {
+                eventId: eventId,
+                seatNumber: {
+                    in: seatNumbers
+                }
+            },
+            select: {
+                price: true
+            }
+        });
+        return prices.reduce((sum, seat) => sum + seat.price, 0);
+    }
+    catch (error) {
+        console.error('Error getting seats price sum:', error);
+        return 0;
+    }
+};
 const areSeatsAvailable = async (eventId, seatNumbers) => {
     try {
         const isAvailable = await prisma.seat.findMany({
@@ -63,5 +83,5 @@ export const updateSeatsInternal = async (eventId, seatNumbers) => {
         console.error(error);
     }
 };
-export { lockSeats, areSeatsAvailable };
+export { lockSeats, areSeatsAvailable, seatsPriceSum };
 //# sourceMappingURL=BookingUtils.js.map
