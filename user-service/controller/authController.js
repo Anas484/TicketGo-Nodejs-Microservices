@@ -27,12 +27,16 @@ const signUpUser = async (req,res) => {
                 role
             }
         });
+        const token = generateJWT(user);
         res.status(201).json({
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role: user.role
+            user: {
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role
+            },
+            token
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -60,7 +64,11 @@ const loginUser = async (req , res) => {
     const token = generateJWT(user);
     res.status(200).json({ 
         user:{
-            email: user.email
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role
         },
         token
      });
