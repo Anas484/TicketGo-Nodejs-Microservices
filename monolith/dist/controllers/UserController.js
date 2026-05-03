@@ -1,7 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { lockSeats, areSeatsAvailable } from "../utils/BookingUtils.js";
 import { userResponseMapper } from "../utils/Mapper.js";
-const prisma = new PrismaClient();
+import { updateSeatStatusSchema } from "../zod/InternalZod.js";
+import { updateSeatsInternal } from "../utils/BookingUtils.js";
+import { prisma } from "../utils/PrismaConn.js";
+import { bookSeatsSchema } from "../zod/UserZod.js";
 const getAllEvents = async (req, res) => {
     try {
         const events = await prisma.event.findMany();
@@ -17,7 +19,8 @@ const getEventsByName = async (req, res) => {
         const events = await prisma.event.findMany({
             where: {
                 name: {
-                    contains: req.params.query
+                    contains: req.query.q,
+                    mode: 'insensitive'
                 }
             }
         });
@@ -30,25 +33,45 @@ const getEventsByName = async (req, res) => {
 };
 const createBooking = async (req, res) => {
     try {
-        const { userId, eventId, seatNumbers } = req.body;
-        await lockSeats({ userId, eventId, seatNumbers });
-        //Check if seats are available
-        const areSeatsAvailableResult = await areSeatsAvailable(Number(eventId), seatNumbers);
+        const userId = req.user?.id;
+        const parsed = bookSeatsSchema.safeParse(req.body);
+        if (!parsed.success) {
+            throw new Error("Please enter field correctly");
+        }
+        const { eventId, seatNumbers } = parsed.data;
+        await lockSeats(userId, eventId.toString(), seatNumbers);
+        const areSeatsAvailableResult = await areSeatsAvailable(eventId, seatNumbers);
         if (areSeatsAvailableResult) {
             const booking = await prisma.booking.create({
                 data: {
                     userId: Number(userId),
-                    eventId: Number(eventId),
+                    eventId: eventId,
                     seatNumbers: seatNumbers
                 }
             });
-            res.status(200).json({ "data": booking });
+            await updateSeatsInternal(eventId, seatNumbers);
+            return res.status(200).json({ "data": booking });
         }
-        res.status(400).json({ "message": "Some seats are not available" });
+        return res.status(400).json({ "message": "Some seats are not available" });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ "message": `Server error ${error}` });
+        return res.status(500).json({ "message": `Server error ${error}` });
+    }
+};
+const getMyBookings = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const bookings = await prisma.booking.findMany({
+            where: {
+                userId: Number(userId)
+            }
+        });
+        return res.status(200).json({ "data": bookings });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
 const getMyDetails = (req, res) => {
@@ -70,5 +93,19 @@ const getMyDetails = (req, res) => {
         res.status(500).json({ "message": `Server error ${error}` });
     }
 };
-export { getAllEvents, getEventsByName, createBooking, getMyDetails };
+const getAllSeatsByEvents = async (req, res) => {
+    try {
+        const seats = await prisma.seat.findMany({
+            where: {
+                eventId: Number(req.params.id)
+            }
+        });
+        return res.status(200).json({ "data": seats });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ "message": `Server error ${error}` });
+    }
+};
+export { getAllEvents, getEventsByName, createBooking, getMyBookings, getMyDetails, getAllSeatsByEvents };
 //# sourceMappingURL=UserController.js.map

@@ -2,9 +2,10 @@ import type { BookingRequest } from "../interfaces/UserInterface.js";
 import { getRedisClient } from "../configs/redisConfig.js";
 import { PrismaClient } from "@prisma/client";
 
+
 const prisma = new PrismaClient();
 
-async function lockSeats({userId,eventId, seatNumbers} : BookingRequest) {
+async function lockSeats(userId:string , eventId:string, seatNumbers:string[]) {
   const redisClient = getRedisClient();
   
   for (const seat of seatNumbers) {
@@ -37,11 +38,11 @@ const areSeatsAvailable = async(eventId:Number,seatNumbers:string[]) => {
                 isAvailable:true
             }
         })
-        const notAvailableSeats = isAvailable.filter(seat => seat.isAvailable == false)
-        if (notAvailableSeats) {
-            for(const seat of notAvailableSeats)
-            console.log(`seat ${seat.seatNumber} is not avalable`)
-            return false
+        for(const seat of isAvailable){
+            if (seat.isAvailable == false) {
+                console.log(`Seat ${seat.seatNumber} is not available`)
+                return false
+            }
         }
         return true
     } catch (error) {
@@ -50,7 +51,28 @@ const areSeatsAvailable = async(eventId:Number,seatNumbers:string[]) => {
     }
 }
 
+export const updateSeatsInternal = async (eventId:number, seatNumbers:string[]) => {
+    try {
+        if (!eventId && !seatNumbers) {
+            throw new Error("No eventId and seats provide to update");
+            
+        }
+        await prisma.seat.updateMany({
+            where:{
+                eventId:eventId,
+                seatNumber:{
+                    in:seatNumbers
+                }
+            },
+            data:{
+                isAvailable:false
+            }
 
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 
 

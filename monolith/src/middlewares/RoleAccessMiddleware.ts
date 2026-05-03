@@ -2,7 +2,7 @@ import "dotenv/config"
 import type { Request, Response , NextFunction} from "express";
 
 
-const roleAccessMiddleware = (role: string) => {
+export const roleAccessMiddleware = (role: string) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const user = req.user;
         if (!user) {
@@ -15,4 +15,4 @@ const roleAccessMiddleware = (role: string) => {
     }
 }
 
-export default roleAccessMiddleware;
+

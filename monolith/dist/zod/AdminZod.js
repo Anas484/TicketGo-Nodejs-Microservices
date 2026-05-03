@@ -1,25 +1,25 @@
 import { z } from 'zod';
-export const UserZod = z.object({
+export const UserResponseSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     email: z.string(),
     role: z.string()
 });
-export const EventRequest = z.object({
+export const EventRequestSchema = z.object({
     name: z.string(),
     description: z.string(),
     date: z.coerce.date(),
     location: z.string(),
     capacity: z.number()
 });
-export const EventResponse = z.object({
+export const EventResponseSchema = z.object({
     name: z.string(),
     description: z.string(),
     date: z.date(),
     location: z.string(),
     capacity: z.number()
 });
-export const updateEventsRequest = z.object({
+export const updateEventsRequestSchema = z.object({
     name: z.string(),
     description: z.string(),
     date: z.date(),

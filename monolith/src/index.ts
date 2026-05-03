@@ -7,9 +7,9 @@ import { connectRedis } from "./configs/redisConfig.js"
 
 const app = express();
 
-// (() => {
-//     connectRedis();
-// })()
+(() => {
+    connectRedis();
+})()
 
 
 app.use(express.json())

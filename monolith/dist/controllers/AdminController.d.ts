@@ -9,5 +9,6 @@ declare const getAllBookings: (req: Request, res: Response) => Promise<Response<
 declare const getBookingById: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
 declare const deleteBooking: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
 declare const generateSeats: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
-export { getAllUsers, getUserById, getAllEvents, createEvent, updateEvent, deleteEvent, getAllBookings, getBookingById, deleteBooking, generateSeats };
+declare const getAllSeatsByEvents: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
+export { getAllUsers, getUserById, getAllEvents, createEvent, updateEvent, deleteEvent, getAllBookings, getBookingById, deleteBooking, generateSeats, getAllSeatsByEvents };
 //# sourceMappingURL=AdminController.d.ts.map

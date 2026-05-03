@@ -5,9 +5,9 @@ import AdminRouter from './routes/AdminRouter.js';
 import UserRouter from './routes/UserRouter.js';
 import { connectRedis } from "./configs/redisConfig.js";
 const app = express();
-// (() => {
-//     connectRedis();
-// })()
+(() => {
+    connectRedis();
+})();
 app.use(express.json());
 app.use('/auth', AuthRouter);
 app.use('/admin', AdminRouter);

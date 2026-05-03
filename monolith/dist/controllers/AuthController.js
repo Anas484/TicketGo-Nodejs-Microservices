@@ -1,11 +1,11 @@
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/JwtUtil.js";
-import { loginRequest, loginResponse, signUpRequest, signUpResponse } from "../zod/AuthZod.js";
+import { loginRequestSchema, loginResponseSchema, signUpRequestSchema, signUpResponseSchema } from "../zod/AuthZod.js";
 import { prisma } from "../utils/PrismaConn.js";
 const signup = async (req, res) => {
     try {
-        const userRequest = signUpRequest.safeParse(req.body);
+        const userRequest = signUpRequestSchema.safeParse(req.body);
         if (!userRequest.success) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -36,7 +36,7 @@ const signup = async (req, res) => {
                 role: enterRole
             }
         });
-        return res.status(201).json({ message: "User created successfully", ...signUpResponse.safeParse({ firstName, lastName, email, role }).data });
+        return res.status(201).json({ message: "User created successfully", ...signUpResponseSchema.safeParse({ firstName, lastName, email, role }).data });
     }
     catch (error) {
         console.log(error);
@@ -45,7 +45,7 @@ const signup = async (req, res) => {
 };
 const login = async (req, res) => {
     try {
-        const userRequest = loginRequest.safeParse(req.body);
+        const userRequest = loginRequestSchema.safeParse(req.body);
         if (!userRequest.success) {
             return res.status(400).json({ message: "Email and password are required" });
         }
@@ -63,7 +63,7 @@ const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid password" });
         }
         const token = generateToken({ id: user.id.toString(), role: user.role.toString() });
-        return res.status(200).json({ message: "User logged in successfully", ...loginResponse.safeParse({ id: user.id, token }).data });
+        return res.status(200).json({ message: "User logged in successfully", ...loginResponseSchema.safeParse({ id: user.id, token }).data });
     }
     catch (error) {
         console.log(error);

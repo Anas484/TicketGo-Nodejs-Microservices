@@ -8,6 +8,5 @@ declare global {
         }
     }
 }
-declare const jwtFilter: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
-export default jwtFilter;
+export declare const jwtFilter: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 //# sourceMappingURL=JwtFilterMiddleware.d.ts.map

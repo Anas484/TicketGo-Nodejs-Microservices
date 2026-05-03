@@ -1,5 +1,5 @@
 import "dotenv/config";
-const roleAccessMiddleware = (role) => {
+export const roleAccessMiddleware = (role) => {
     return (req, res, next) => {
         const user = req.user;
         if (!user) {
@@ -11,5 +11,4 @@ const roleAccessMiddleware = (role) => {
         next();
     };
 };
-export default roleAccessMiddleware;
 //# sourceMappingURL=RoleAccessMiddleware.js.map

@@ -1,10 +1,10 @@
 import {} from "express";
 import { prisma } from "../utils/PrismaConn.js";
-import { EventRequest, EventResponse, UserZod, updateEventsRequest } from "../zod/AdminZod.js";
+import { EventRequestSchema, EventResponseSchema, UserResponseSchema, updateEventsRequestSchema } from "../zod/AdminZod.js";
 import z from "zod";
 import { id } from "zod/locales";
-const UsersArrayZod = z.array(UserZod);
-const EventsArrayZod = z.array(EventResponse);
+const UsersArrayZod = z.array(UserResponseSchema);
+const EventsArrayZod = z.array(EventResponseSchema);
 const getAllUsers = async (req, res) => {
     try {
         const users = await prisma.user.findMany();
@@ -29,7 +29,7 @@ const getUserById = async (req, res) => {
         if (!user) {
             return res.status(400).json({ "message": "user not found" });
         }
-        const userResponse = UserZod.safeParse(user);
+        const userResponse = UserResponseSchema.safeParse(user);
         if (!userResponse.success) {
             return res.status(400).json({ message: "Validation error" });
         }
@@ -56,7 +56,7 @@ const getAllEvents = async (req, res) => {
 };
 const createEvent = async (req, res) => {
     try {
-        const parseEvent = EventRequest.safeParse(req.body);
+        const parseEvent = EventRequestSchema.safeParse(req.body);
         if (!parseEvent.success) {
             throw new Error("Please enter correct fields");
         }
@@ -79,7 +79,7 @@ const createEvent = async (req, res) => {
 };
 const updateEvent = async (req, res) => {
     try {
-        const parsedEvent = updateEventsRequest.safeParse(req.body);
+        const parsedEvent = updateEventsRequestSchema.safeParse(req.body);
         const id = Number(req.params.id);
         if (!parsedEvent.success) {
             throw new Error("Please enter correct fields");
@@ -156,7 +156,7 @@ const deleteBooking = async (req, res) => {
 const generateSeats = async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const capacity = await prisma.event.findUnique({
+        const event = await prisma.event.findUnique({
             where: {
                 id: Number(id)
             },
@@ -164,10 +164,19 @@ const generateSeats = async (req, res) => {
                 capacity: true
             }
         });
+        const isSeats = await prisma.seat.findMany({
+            where: {
+                eventId: id
+            }
+        });
+        if (isSeats.length > 0) {
+            return res.status(400).json({ "message": "Seats already generated" });
+        }
+        const random = ["A", "B", "C"];
         const seats = await prisma.seat.createMany({
-            data: Array.from({ length: Number(capacity) }, (_, i) => ({
+            data: Array.from({ length: Number(event?.capacity) }, (_, i) => ({
                 eventId: id,
-                seatNumber: `${i + 1}`,
+                seatNumber: `${random[i % random.length]}${i + 1}`,
                 price: Number((Math.random() * 500 + 100).toFixed(2)),
                 isAvailable: true
             }))
@@ -179,5 +188,40 @@ const generateSeats = async (req, res) => {
         return res.status(500).json({ "message": `Server error ${error}` });
     }
 };
-export { getAllUsers, getUserById, getAllEvents, createEvent, updateEvent, deleteEvent, getAllBookings, getBookingById, deleteBooking, generateSeats };
+const getAllSeatsByEvents = async (req, res) => {
+    try {
+        const seats = await prisma.seat.findMany({
+            where: {
+                eventId: Number(req.params.id)
+            }
+        });
+        return res.status(200).json({ "data": seats });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ "message": `Server error ${error}` });
+    }
+};
+const getAvailableSeatsCount = async (req, res) => {
+    try {
+        let count = 0;
+        const seats = await prisma.seat.count({
+            where: {
+                eventId: Number(req.params.id),
+                isAvailable: true
+            }
+        });
+        for (const seat of seats) {
+            if (seat.isAvailable == true) {
+                count++;
+            }
+        }
+        return res.status(200).json({ "data": count });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ "message": `Server error ${error}` });
+    }
+};
+export { getAllUsers, getUserById, getAllEvents, createEvent, updateEvent, deleteEvent, getAllBookings, getBookingById, deleteBooking, generateSeats, getAllSeatsByEvents };
 //# sourceMappingURL=AdminController.js.map

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import jwt from 'jsonwebtoken';
-const jwtFilter = (req, res, next) => {
+export const jwtFilter = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -14,5 +14,4 @@ const jwtFilter = (req, res, next) => {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 };
-export default jwtFilter;
 //# sourceMappingURL=JwtFilterMiddleware.js.map

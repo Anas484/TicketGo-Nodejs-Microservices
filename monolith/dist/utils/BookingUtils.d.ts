@@ -1,5 +1,5 @@
-import type { BookingRequest } from "../interfaces/UserInterface.js";
-declare function lockSeats({ userId, eventId, seatNumbers }: BookingRequest): Promise<void>;
+declare function lockSeats(userId: string, eventId: string, seatNumbers: string[]): Promise<void>;
 declare const areSeatsAvailable: (eventId: Number, seatNumbers: string[]) => Promise<boolean>;
+export declare const updateSeatsInternal: (eventId: number, seatNumbers: string[]) => Promise<void>;
 export { lockSeats, areSeatsAvailable };
 //# sourceMappingURL=BookingUtils.d.ts.map
