@@ -7,6 +7,9 @@ This is a monorepo for the TicketGo application, which is a ticket booking syste
 ### Overview
 TicketGo follows a microservices architecture pattern where the application is decomposed into loosely coupled, independently deployable services. Each service is responsible for a specific business capability and communicates with other services through well-defined APIs and message queues.
 
+### Live backend : https://ticketgo-nodejs.onrender.com
+### API docs : https://documenter.getpostman.com/view/45877419/2sBXqKofgu
+
 ### Architecture Diagram
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
