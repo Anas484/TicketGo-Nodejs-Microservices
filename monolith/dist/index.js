@@ -4,7 +4,12 @@ import AuthRouter from './routes/AuthRouter.js';
 import AdminRouter from './routes/AdminRouter.js';
 import UserRouter from './routes/UserRouter.js';
 // import { connectRedis } from "./configs/redisConfig.js"
+import cors from 'cors';
 const app = express();
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
 // (() => {
 //     connectRedis();
 // })()

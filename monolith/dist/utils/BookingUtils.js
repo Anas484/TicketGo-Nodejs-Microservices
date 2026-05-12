@@ -49,6 +49,10 @@ const areSeatsAvailable = async (eventId, seatNumbers) => {
                 isAvailable: true
             }
         });
+        if (!isAvailable || isAvailable.length === 0) {
+            console.log('No seats found');
+            return false;
+        }
         for (const seat of isAvailable) {
             if (seat.isAvailable == false) {
                 console.log(`Seat ${seat.seatNumber} is not available`);
